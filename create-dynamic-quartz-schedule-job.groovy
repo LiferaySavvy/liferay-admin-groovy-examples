@@ -25,7 +25,7 @@ int exceptionsMaxSize = 10;
 try {
 	DestinationConfiguration destinationConfig =  DestinationConfiguration.createParallelDestinationConfiguration(destinationName);
 	Destination parallelDestination = DestinationFactoryUtil.createDestination(destinationConfig);
-	MessageBusUtil.addDestination(parallelDestination);
+
 	String portletId = null;
 	ClassLoader classLoader = null;
 	if(portletId != null){
@@ -34,19 +34,16 @@ try {
 	} else {
 		classLoader = PortalClassLoaderUtil.getClassLoader();
 	}
-	MessageListener messageListener = null;
-
-		messageListener = (MessageListener)classLoader.loadClass(className).newInstance();
-		out.printlln("messageListener :: ${messageListener}");
-		parallelDestination.register(messageListener);
-
-
+	MessageListener messageListener = (MessageListener)classLoader.loadClass(className).newInstance();
+	out.println("messageListener :: ${messageListener}");
+	parallelDestination.register(messageListener);
+	MessageBusUtil.addDestination(parallelDestination);
 	//Create schedule job with cron expression.
 
 	Trigger trigger = TriggerFactoryUtil.createTrigger(jobName,groupName,cronExpression);
 	Message message = new Message();
 	message.put("data","My Data required for job..");
-	SchedulerEngineHelperUtil.schedule(trigger, StorageType.PERSISTED, description,destinationName, message, int exceptionsMaxSize)
+	SchedulerEngineHelperUtil.schedule(trigger, StorageType.PERSISTED, description,destinationName, message, exceptionsMaxSize)
 } catch (Exception e) {
 	e.printStackTrace();
 }
